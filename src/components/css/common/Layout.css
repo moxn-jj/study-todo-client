@@ -1,0 +1,12 @@
+#header{display: flex;flex-direction: row;margin: 24px;border: 1px solid #fff;border-radius: 14px;}
+
+.logo{width: 30%;padding-top: 20px;border-right: 1px solid #fff;text-align: center;line-height: 24px;}
+
+.nav{padding: 20px 28px;width: 70%;}
+.nav .non-member-area{padding-bottom: 20px;}
+.nav .member-area{}
+.nav .menus{display: flex;flex-direction: row;padding-top: 5px;}
+.nav .menus .link{padding-right: 14px;color: #fff;}
+.nav .menus .link:hover{color: #ffcb00;}
+.nav .menus .link:not(:last-child)::after{content: "|";padding-left: 14px;font-size: 12px;}
+.main{position: relative;}

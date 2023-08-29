@@ -1,0 +1,7 @@
+.palette{}
+.palette .colors{padding: 20px 0 0;text-align: center;}
+.palette .colors .color{display: inline-block;margin: 6px;width: 36px;height: 36px;text-indent: -9999px;cursor: pointer;}
+.palette .colors .color.white{background-color: var(--white);}
+.palette .colors .color.red{background-color: var(--red);}
+.palette .colors .color.green{background-color: var(--green);}
+.palette .colors .color.blue{background-color: var(--blue);}
