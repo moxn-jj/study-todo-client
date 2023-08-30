@@ -8,7 +8,8 @@ function Menu() {
             <div className="non-member-area">
                 <p>비회원</p>
                 <div className="menus">
-                    <Link className="link" to="/">Sign-In</Link>
+                    <Link className="link" to="/">Home</Link>
+                    <Link className="link" to="/signin">Sign-In</Link>
                     <Link className="link" to="/signup">Sign-Up</Link>
                 </div>
             </div>
