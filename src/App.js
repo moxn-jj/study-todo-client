@@ -1,9 +1,10 @@
 import React from "react";
 import './App.css';
 import './Font.css';
+import Home from './page/Home'
 import Todo from './page/Todo'
-import SignIn from './page/Signin';
-import SignUp from './page/Signup';
+import Signin from './page/Signin';
+import Signup from './page/Signup';
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import Layout from "./components/js/common/Layout";
 
@@ -14,8 +15,9 @@ class App extends React.Component {
             <Router>
                 <Routes>
                     <Route element={<Layout />}>
-                        <Route path="/" element={<Signin />} />
+                        <Route path="/" element={<Home />} />
                         <Route path="/todo" element={<Todo />} />
+                        <Route path="/signin" element={<Signin />} />
                         <Route path="/signup" element={<Signup />} />
                     </Route>
                 </Routes>
