@@ -8,7 +8,7 @@ const colors = ['white', 'red', 'green', 'blue'];
 
 class Todo extends React.Component {
 
-    // test : git branch feature-test 2
+    // test : git branch feature-test 3
 
     constructor(props) {
         super(props);
