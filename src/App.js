@@ -1,5 +1,4 @@
 import React from "react";
-import './App.css';
 import './Font.css';
 import Home from './page/Home'
 import Todo from './page/Todo'
