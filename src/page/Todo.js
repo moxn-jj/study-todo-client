@@ -9,6 +9,8 @@ const colors = ['white', 'red', 'green', 'blue'];
 
 const Todo = () => {
 
+    // test code 
+    
     const { getAuthorization, setAuthorization } = useGlobalState();
     const [ color, setColor ] = useState('white');
     const [ todos, setTodos ] = useState([]);
