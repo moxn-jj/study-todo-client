@@ -37,19 +37,38 @@ const Signup = () => {
         console.log(data);
 
         fetch('http://localhost:3000/api/auth/signup', data)
-            .then(res => {
-                if(!res.ok) {
-                    throw new Error(res.status);
+                
+            .then(response => {
+                
+
+                console.log(response);
+                if(!response.ok) {
+
+                    console.log('1-1');
+                    return response.json();
                 }else {
-                    console.log(res);
-                    return successTemp();
+                    
+                    console.log('1-2');
+                    return response.json();
                 }
             })
-            .catch(err => console.log(err));
+            .then(json => {
+                console.log('2');
+                console.log(json);
+            })
+            .catch(error => {
+                console.log('33');
+                console.log(error);
+            });
     };
 
     const successTemp = () => {
         console.log('TODO : 성공 시 동작하는 임시 함수입니다.');
+    }
+
+    const failTemp = (text) => {
+        console.log('TODO : 실패 시 동작하는 임시 함수입니다.');
+        console.log(text)
     }
 
     return (
