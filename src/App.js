@@ -6,21 +6,24 @@ import Signin from './page/Signin';
 import Signup from './page/Signup';
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import Layout from "./components/js/common/Layout";
+import { GlobalStateProvider } from './context/GlobalStateContext';
 
 class App extends React.Component {
 
     render() {
         return (
-            <Router>
-                <Routes>
-                    <Route element={<Layout />}>
-                        <Route path="/" element={<Home />} />
-                        <Route path="/todo" element={<Todo />} />
-                        <Route path="/signin" element={<Signin />} />
-                        <Route path="/signup" element={<Signup />} />
-                    </Route>
-                </Routes>
-            </Router>
+            <GlobalStateProvider>
+                <Router>
+                    <Routes>
+                        <Route element={<Layout />}>
+                            <Route path="/" element={<Home />} />
+                            <Route path="/todo" element={<Todo />} />
+                            <Route path="/signin" element={<Signin />} />
+                            <Route path="/signup" element={<Signup />} />
+                        </Route>
+                    </Routes>
+                </Router>
+            </GlobalStateProvider>
         );
     }
 }

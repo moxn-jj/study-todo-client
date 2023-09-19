@@ -1,48 +1,59 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import TodoListTemplate from "../components/js/todo/TodoListTemplate";
 import Form from '../components/js/todo/Form'
 import TodoItemList from '../components/js/todo/TodoItemList';
 import Palette from "../components/js/todo/Palette";
+import { useGlobalState } from '../context/GlobalStateContext.js';
 
 const colors = ['white', 'red', 'green', 'blue'];
 
-class Todo extends React.Component {
+const Todo = () => {
 
+    const { getAuthorization, setAuthorization } = useGlobalState();
+    const [ color, setColor ] = useState('white');
+    const [ todos, setTodos ] = useState([]);
     // test : git branch develop & feature-todo & feature-test merge
 
-    constructor(props) {
-        super(props);
-
-        // 초기 state 정의하기 (defining default values of state)
-        this.state = {
-            color: 'white'
-            , todos: []
-        }
-
-        // this.handleChange = this.handleChange.bind(this);
-        this.handleCreate = this.handleCreate.bind(this);
-        // this.handleKeyDown = this.handleKeyDown.bind(this);
-        this.handleToggle = this.handleToggle.bind(this);
-        this.handleRemove = this.handleRemove.bind(this);
-        this.handleColor = this.handleColor.bind(this);
-    }
-    
     // ***************** backend 연동 시작 *****************
     // 초기화 작업
-    componentDidMount() {
-
-        fetch("/api/todos")
-            .then(res => res.json())
-            .then(todos => this.setState({todos:todos}))
+    useEffect(() => {
+        console.log(getAuthorization());
+        fetch("/api/todos", {
+                authorization: getAuthorization()
+            })
+            .then(response => {
+                if(!response.ok) {
+                    return response.json();
+                }else {
+                    return response.json();
+                }
+            })
+            .then(data => {
+                // this.setState({todos : todos})
+                // setTodos(todos);
+                console.log(data);
+            })
             .catch(err => console.log(err));
-    }
+    }, []);  // 의존성 배열이 빈 배열이므로 이 useEffect는 컴포넌트가 마운트될 때 딱 한 번만 실행됩니다.
+    
+    function handleInitInfo() {
 
-    handleInitInfo() {
-
-            fetch("/api/todos")
-                .then(res => res.json())
-                .then(todos => this.setState({todos : todos}))
-                .catch(err => console.log(err));
+        fetch("/api/todos", {
+                authorization: getAuthorization()
+            })
+            .then(response => {
+                if(!response.ok) {
+                    return response.json();
+                }else {
+                    return response.json();
+                }
+            })
+            .then(res => res.json())
+            .then(todos => {
+                // this.setState({todos : todos})
+                // setTodos(todos);
+            })
+            .catch(err => console.log(err));
     }
     // ****************** backend 연동 끝 ******************
 
@@ -56,51 +67,58 @@ class Todo extends React.Component {
 
     // form 컴포넌트에 필요한 기능
     // 버튼이 클릭되면 새로운 todo 생성 후 todos 업데이트
-    handleCreate(inputValue) {
+    function handleCreate(inputValue) {
 
-        const {color, todos} = this.state;
+        // const {color, todos} = this.state;
 
         if(inputValue === ''){
             alert('할 일을 입력해 주세요.');
             return;
         }
-
-        // event.target.parentNode.firstChild.value = '';
-        this.setState({
-            // input: '' // 추가 후의 값을 세팅 중이기 때문에 input 비우기
-
-            /*
-            리액트 state에서는 배열을 다룰 때 push를 사용하면 안됨
-            왜냐하면 push는 기존 배열에 새 요소 추가, concat은 새 요소를 추가한 새 배열 생성 
-            => 따라서 추후 배열 비교를 통해 리렌더링을 방지하는 최적화를 진행할 때 push면 최적화가 불가능
-            */
-            todos: todos.concat({ 
+        setTodos(todos.concat({ 
                 // id: this.id++
-                id: 0
+                id: todos.length + 1
                 // , content: input
                 , content: inputValue
                 , isComplete: false
                 , color: color
             })
-        });
+        );
 
         const data = {
             body: JSON.stringify({"content":inputValue,"color":color})
-            , headers: {'Content-Type':'application/json'}
+            , headers: {
+                    'Content-Type':'application/json'
+                    , authorization: getAuthorization()
+                }
             , method: 'post'
         };
 
         console.log(data);
 
         fetch("/api/todos", data)
-            .then(res => {
-                if(!res.ok) {
-                    throw new Error(res.status);
+            .then(response => {
+                console.log(response);
+                if(!response.ok) {
+                    console.log('실패!');
+                    return response.json().then(err => {
+                        throw {errorCode: err.errorCode, errorMessage: err.errorMessage};
+                    });
                 }else {
-                    return this.handleInitInfo();
+                    console.log('성공!');
+
+                    const newAccessToken = response.headers.get('Authorization');
+                    if(newAccessToken) {
+                        console.log('newAccessToken2');
+                        setAuthorization(newAccessToken);
+                    }
                 }
             })
-            .catch(err => console.log(err));
+            .catch(err => {
+                console.log('err');
+                console.log(err);
+                alert(`${err.errorMessage} (${err.errorCode})`);
+            });
 
     }
 
@@ -112,7 +130,7 @@ class Todo extends React.Component {
     //     }
     // }
 
-    handleToggle(id) {
+    function handleToggle(id) {
         const {todos} = this.state;
 
         // 파라미터로 받은 id로 몇번째 아이템인지 찾기
@@ -134,10 +152,8 @@ class Todo extends React.Component {
             ...selected,
             isComplete : !selected.isComplete
         };
-        
-        this.setState({
-            todos: nextTodos
-        });
+
+        setTodos(nextTodos);
 
         const data = {
             header: {'Content-Type':'application/json'}
@@ -156,7 +172,7 @@ class Todo extends React.Component {
 
     }
 
-    handleRemove(id) {
+    function handleRemove(id) {
         const {todos} = this.state;
 
         const removeContent = todos.find(todo => todo.id === id).content;
@@ -164,10 +180,8 @@ class Todo extends React.Component {
             return;
         }
 
-        this.setState({
-            // 파라미터로 받은 id를 가지지 않은 배열을 새로 생성
-            todos: todos.filter(todo => todo.id !== id)
-        });
+        // 파라미터로 받은 id를 가지지 않은 배열을 새로 생성
+        setTodos(todos.filter(todo => todo.id !== id));
 
         const data = {
             header: {'Content-Type':'application/json'}
@@ -182,55 +196,51 @@ class Todo extends React.Component {
                 }
             })
             .catch(err => console.log(err));
+    };
+
+    function handleColor(color){
+        setColor(color);
     }
 
-    handleColor(color){
-        this.setState({
-            color
-        });
-    }
+    // const {input, todos, color} = this.state;
+    // const {handleChange
+    //     , handleCreate
+    //     , handleKeyDown
+    //     , handleToggle
+    //     , handleRemove
+    //     , handleColor} = this;
 
-    render() {
-        const {input, todos, color} = this.state;
-        const {handleChange
-            , handleCreate
-            , handleKeyDown
-            , handleToggle
-            , handleRemove
-            , handleColor} = this;
+    return (
+        <TodoListTemplate 
+            /*
+            1. form에서 input 내용을 변경하면 내부 state가 변경됨
+            2. 해당 데이터를 등록하면 TodoItemList로 전달되어야 함
 
-        return (
-            <TodoListTemplate 
-                /*
-                1. form에서 input 내용을 변경하면 내부 state가 변경됨
-                2. 해당 데이터를 등록하면 TodoItemList로 전달되어야 함
+            => 이 때, form과 TodoItemList가 직접적으로 전달하는 것은 금지하며 (내부 컴포넌트 끼리는 대화하지 않음), 자식 컴포넌트는 부모를 통해서만 대화함
 
-                => 이 때, form과 TodoItemList가 직접적으로 전달하는 것은 금지하며 (내부 컴포넌트 끼리는 대화하지 않음), 자식 컴포넌트는 부모를 통해서만 대화함
+            3. 여기서 부모 컴포넌트는 App이기 때문에 해당 컴포넌트에 input(Form꺼)과 todos(TodoItemList꺼) 상태를 넣어줌
+            4. App의 state를를 각각 컴포넌트에 props로 전달함
+            */
+            palette={<Palette
+                    colors={colors}
+                    onChangeColor={handleColor} />}
 
-                3. 여기서 부모 컴포넌트는 App이기 때문에 해당 컴포넌트에 input(Form꺼)과 todos(TodoItemList꺼) 상태를 넣어줌
-                4. App의 state를를 각각 컴포넌트에 props로 전달함
-                */
-                palette={<Palette
-                        colors={colors}
-                        onChangeColor={handleColor} />}
+            // TodoListTemplate의 form
+            form={<Form 
+                    // value={input} 
+                    color={color}
+                    // onChange={handleChange} 
+                    onCreate={handleCreate} 
+                    // onKeyDown={handleKeyDown} 
+                    />}>
 
-                // TodoListTemplate의 form
-                form={<Form 
-                        // value={input} 
-                        color={color}
-                        // onChange={handleChange} 
-                        onCreate={handleCreate} 
-                        // onKeyDown={handleKeyDown} 
-                        />}>
-
-                {/* TodoListTemplate의 children */}
-                <TodoItemList 
-                    todos={todos}
-                    onToggle={handleToggle}
-                    onRemove={handleRemove} />
-            </TodoListTemplate>
-        );
-    }
+            {/* TodoListTemplate의 children */}
+            <TodoItemList 
+                todos={todos}
+                onToggle={handleToggle}
+                onRemove={handleRemove} />
+        </TodoListTemplate>
+    );
 }
 
 export default Todo;
