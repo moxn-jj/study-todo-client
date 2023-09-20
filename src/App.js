@@ -6,7 +6,7 @@ import Signin from './page/Signin';
 import Signup from './page/Signup';
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import Layout from "./components/js/common/Layout";
-import { GlobalStateProvider } from './context/GlobalStateContext';
+import { GlobalStateProvider } from './util/GlobalStateContext';
 
 class App extends React.Component {
 
