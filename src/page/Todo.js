@@ -3,69 +3,44 @@ import TodoListTemplate from "../components/js/todo/TodoListTemplate";
 import Form from '../components/js/todo/Form'
 import TodoItemList from '../components/js/todo/TodoItemList';
 import Palette from "../components/js/todo/Palette";
-import { useGlobalState } from '../context/GlobalStateContext.js';
+import { useGlobalState } from '../util/GlobalStateContext.js';
+import { useFetch } from '../util/useFetch';
 
 const colors = ['white', 'red', 'green', 'blue'];
 
 const Todo = () => {
 
-    // test code 
-    
+    const commonFetch = useFetch();
     const { getAuthorization, setAuthorization } = useGlobalState();
     const [ color, setColor ] = useState('white');
     const [ todos, setTodos ] = useState([]);
-    // test : git branch develop & feature-todo & feature-test merge
 
-    // ***************** backend 연동 시작 *****************
     // 초기화 작업
     useEffect(() => {
-        console.log(getAuthorization());
-        fetch("/api/todos", {
-                authorization: getAuthorization()
-            })
-            .then(response => {
-                if(!response.ok) {
-                    return response.json();
-                }else {
-                    return response.json();
-                }
-            })
-            .then(data => {
-                // this.setState({todos : todos})
-                // setTodos(todos);
-                console.log(data);
-            })
-            .catch(err => console.log(err));
+        getTodos();
     }, []);  // 의존성 배열이 빈 배열이므로 이 useEffect는 컴포넌트가 마운트될 때 딱 한 번만 실행됩니다.
     
-    function handleInitInfo() {
 
-        fetch("/api/todos", {
-                authorization: getAuthorization()
-            })
-            .then(response => {
-                if(!response.ok) {
-                    return response.json();
-                }else {
-                    return response.json();
-                }
-            })
-            .then(res => res.json())
-            .then(todos => {
-                // this.setState({todos : todos})
-                // setTodos(todos);
-            })
-            .catch(err => console.log(err));
+    async function getTodos() {
+
+        // commonFetch에 await를 붙임으로써 commonFetch가 끝날 때까지 기다림
+        await commonFetch(
+            '/api/todos', 
+            {method: 'GET'}, 
+            data => {
+                console.log('2. 실행돼?');
+                setTodos(data);
+            }
+        ).then(res => {
+            console.log(res);
+            console.log('3. 추가적인 성공 로직이 필요한 경우');
+        }).catch(err => {
+            console.log(err);
+            console.log('3. 추가적인 실패 로직이 필요한 경우');
+        });
+
+        console.log('4. commonFetch가 서버 응답까지 받아야 실행');
     }
-    // ****************** backend 연동 끝 ******************
-
-    // form 컴포넌트에 필요한 기능
-    // 텍스트 내용이 변경되면 state 업데이트
-    // handleChange(event) {
-    //     this.setState({
-    //         input: event.target.value // input의 현재 값
-    //     });
-    // }
 
     // form 컴포넌트에 필요한 기능
     // 버튼이 클릭되면 새로운 todo 생성 후 todos 업데이트
@@ -232,7 +207,7 @@ const Todo = () => {
                     // value={input} 
                     color={color}
                     // onChange={handleChange} 
-                    onCreate={handleCreate} 
+                    onCreate={getTodos} 
                     // onKeyDown={handleKeyDown} 
                     />}>
 
