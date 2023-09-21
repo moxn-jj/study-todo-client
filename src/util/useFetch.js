@@ -12,7 +12,7 @@ export const useFetch = () => {
 
         // 공통 옵션 설정
         options.headers = {
-            ...(options.headers || {}),
+            ...(options.headers ?? {}),
             'Content-Type':'application/json',
             authorization: getAuthorization()
         };
@@ -33,19 +33,21 @@ export const useFetch = () => {
                     return response.json();
                 }else {
 
-                    // 401 에러의 경우 토큰이 올바르지 못하다고 판단하여 비움
-                    // TODO : 여기 말고 로그인, 회원가입 페이지 접속 시 비우는게 나을지 고민
-                    if(response.status === 401) {
-                        console.log('401 에러의 경우 토큰이 올바르지 못하다고 판단하여 비움');
-                        setAuthorization('');
-                    }
-
                     try{
                         return response.json().then(error => {
-                            throw {
-                                ...error
+                            return {
+                                ...(error ?? {})
                                 , status:response.status
                             };
+                        }).catch(() => {
+                            return {
+                                status:response.status
+                            }
+                        }).then(error => {
+                            throw {
+                                ...(error ?? {})
+                                , status:response.status
+                            }
                         });
                     }catch(error){
                         console.log('리턴된 에러 포맷이 json 타입이 아닐 때');
@@ -70,13 +72,16 @@ export const useFetch = () => {
 
                 const showErrorMsg = () => {
 
-                    alert(`${error.message ?? '서버에서 에러가 정의되지 않았습니다'} (${error.code ?? 'ERROR_CODE_NOT_DEFINED'})`);
+                    alert(`${error.message ?? '서버에서 에러가 정의되지 않았습니다'} (${error.code ?? error.status})`);
                 };
 
                 if(error.status === 401) {
                     showErrorMsg();
-                    console.log('개발 중 signin 페이지로 이동하는 것 잠시 주석 처리');
-                    // navigate('/signin');
+
+                    if(url !== '/api/auth/signin' || url === '/api/auth/signup') {
+                        console.log('signin 페이지로 이동 : 개발 중 주석');
+                        navigate('/signin');
+                    }
                 }else if(onError) {
                     onError(error);
                 }else {
