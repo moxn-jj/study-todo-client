@@ -1,6 +1,12 @@
-// 한시간 전 시간을 가져온다.
-export const getOneHourAgo = () => {
-    const oneHourAgo = new Date();
-    oneHourAgo.setHours(oneHourAgo.getHours() - 1);
-    return oneHourAgo;
+export const isValidEmail = (email) => {
+    const re = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/g;
+    return re.test(String(email).toLowerCase());
+};
+
+export const isValidPassword = (password) => {
+    return password.length > 3;
+};
+
+export const isValidPasswordCheck = (password, passwordCheck) => {
+    return password === passwordCheck;
 };
