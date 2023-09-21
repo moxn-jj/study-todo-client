@@ -8,7 +8,7 @@ const Signin = () => {
     
     const navigate = useNavigate();
     const commonFetch = useFetch();
-    const {setGlobalState} = useGlobalState();
+    const {setGlobalState, setAuthorization} = useGlobalState();
 
     // stat
     const [email, setEmail] = useState("");
@@ -21,6 +21,11 @@ const Signin = () => {
     // ref
     const emailRef = useRef(null);
     const passwordRef = useRef(null);
+    
+    // access token 초기화
+    useEffect(() => {
+        setAuthorization('');
+    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;

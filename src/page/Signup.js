@@ -23,6 +23,11 @@ const Signup = () => {
     const passwordRef = useRef(null);
     const passwordCheckRef = useRef(null);
 
+    // access token 초기화
+    useEffect(() => {
+        setAuthorization('');
+    }, []);
+    
 	const handleChange = (e) => {
         const { name, value } = e.target;
 
