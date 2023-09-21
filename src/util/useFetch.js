@@ -1,10 +1,8 @@
-import { useGlobalState } from './GlobalStateContext';
 import { useNavigate } from 'react-router-dom';
-
+import { getToken, saveToken } from "./commonFuntion.js";
 export const useFetch = () => {
 
     const navigate = useNavigate();
-    const { getAuthorization, setAuthorization } = useGlobalState();
     
     const commonFetch = (url, options = {}, onSuccess, onError) => {
 
@@ -14,7 +12,7 @@ export const useFetch = () => {
         options.headers = {
             ...(options.headers ?? {}),
             'Content-Type':'application/json',
-            authorization: getAuthorization()
+            authorization: getToken()
         };
         console.log(options);
 
@@ -27,7 +25,7 @@ export const useFetch = () => {
                     const newAccessToken = response.headers.get('Authorization');
                     if(newAccessToken) {
                         console.log('새 accessToken이 발급 되었습니다.');
-                        setAuthorization(newAccessToken);
+                        saveToken(newAccessToken);
                     }
 
                     return response.json();

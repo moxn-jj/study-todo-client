@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useGlobalState } from '../util/GlobalStateContext';
 import { useNavigate } from 'react-router-dom';
 import { useFetch } from '../util/useFetch';
-import { isValidEmail, isValidPassword } from "../util/commonFuntion.js";
+import { isValidEmail, isValidPassword, removeToken, saveToken } from "../util/commonFuntion.js";
 
 const Signin = () => {
     
     const navigate = useNavigate();
     const commonFetch = useFetch();
-    const {setGlobalState, setAuthorization} = useGlobalState();
 
     // stat
     const [email, setEmail] = useState("");
@@ -24,7 +22,7 @@ const Signin = () => {
     
     // access token 초기화
     useEffect(() => {
-        setAuthorization('');
+        removeToken('');
     }, []);
 
     const handleChange = (e) => {
@@ -82,9 +80,8 @@ const Signin = () => {
                 })
             }
             , data => {
-                setGlobalState({
-                    ...data
-                });
+                console.log(data);
+                saveToken(`${data.grantType} ${data.encryptoAccessToken}`);
                 navigate('/');
             }
         );

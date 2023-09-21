@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useGlobalState } from '../util/GlobalStateContext';
 import { useNavigate } from 'react-router-dom';
 import { useFetch } from '../util/useFetch';
-import { isValidEmail, isValidPassword } from "../util/commonFuntion.js";
+import { isValidEmail, isValidPassword, removeToken } from "../util/commonFuntion.js";
 
 const Signup = () => {
 
     const navigate = useNavigate();
     const commonFetch = useFetch();
-    const {setAuthorization} = useGlobalState();
 
     // stat
     const [email, setEmail] = useState("");
@@ -26,7 +24,7 @@ const Signup = () => {
 
     // access token 초기화
     useEffect(() => {
-        setAuthorization('');
+        removeToken();
     }, []);
 
 	const handleChange = (e) => {

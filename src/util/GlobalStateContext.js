@@ -1,4 +1,4 @@
-
+// 해당 파일은 storage 방식으로 변경함으로써 더 이상 필요 없으나 공부 자료로 남겨둠
 import React, { createContext, useContext, useState } from 'react';
 
 const GlobalStateContext = createContext();
@@ -15,16 +15,16 @@ export const GlobalStateProvider = ({ children }) => {
 
     const [globalState, setGlobalState] = useState({
         grantType: '',
-        accessToken: '',
+        encryptoAccessToken: '',
     });
 
     const getAuthorization = () => {
-        return `${globalState.grantType} ${globalState.accessToken}`;
+        return `${globalState.grantType} ${globalState.encryptoAccessToken}`;
     };
     
     const setAuthorization = (newAccessToken) => {
         globalState.grantType = newAccessToken.split(' ')[0];
-        globalState.accessToken = newAccessToken.split(' ')[1];
+        globalState.encryptoAccessToken = newAccessToken.split(' ')[1];
     };
 
     return (
