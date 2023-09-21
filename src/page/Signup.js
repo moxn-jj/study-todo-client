@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useGlobalState } from '../util/GlobalStateContext';
 import { useNavigate } from 'react-router-dom';
 import { useFetch } from '../util/useFetch';
@@ -8,6 +8,7 @@ const Signup = () => {
 
     const navigate = useNavigate();
     const commonFetch = useFetch();
+    const {setAuthorization} = useGlobalState();
 
     // stat
     const [email, setEmail] = useState("");
@@ -27,7 +28,7 @@ const Signup = () => {
     useEffect(() => {
         setAuthorization('');
     }, []);
-    
+
 	const handleChange = (e) => {
         const { name, value } = e.target;
 
