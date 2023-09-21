@@ -33,10 +33,7 @@ const Todo = () => {
             }
         ).then(res => {
             console.log(res);
-            console.log('3. 추가적인 성공 로직이 필요한 경우');
-        }).catch(err => {
-            console.log(err);
-            console.log('3. 추가적인 실패 로직이 필요한 경우');
+            console.log('3. 추가적인 로직이 필요한 경우');
         });
 
         console.log('4. commonFetch가 서버 응답까지 받아야 실행');
@@ -79,7 +76,7 @@ const Todo = () => {
                 if(!response.ok) {
                     console.log('실패!');
                     return response.json().then(err => {
-                        throw {errorCode: err.errorCode, errorMessage: err.errorMessage};
+                        throw {code: err.code, message: err.message};
                     });
                 }else {
                     console.log('성공!');
@@ -94,7 +91,7 @@ const Todo = () => {
             .catch(err => {
                 console.log('err');
                 console.log(err);
-                alert(`${err.errorMessage} (${err.errorCode})`);
+                alert(`${err.message} (${err.code})`);
             });
 
     }

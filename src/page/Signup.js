@@ -1,75 +1,100 @@
-import React, {useState} from "react";
+import React, { useState, useRef } from "react";
+import { useGlobalState } from '../util/GlobalStateContext';
+import { useNavigate } from 'react-router-dom';
+import { useFetch } from '../util/useFetch';
+import { isValidEmail, isValidPassword } from "../util/commonFuntion.js";
 
-// class Signup extends React.Component {
 const Signup = () => {
 
-    const [ member, setMember ] = useState({
-        email: ''
-        , password: ''
-        , passwordCheck: ''
+    const navigate = useNavigate();
+    const commonFetch = useFetch();
+
+    // stat
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [passwordCheck, setPasswordCheck] = useState(null);
+    const [error, setError] = useState({
+        type: null
+        , msg: null
     });
-    const {email, password, passwordCheck} = member;
-    
+
+    // ref
+    const emailRef = useRef(null);
+    const passwordRef = useRef(null);
+    const passwordCheckRef = useRef(null);
+
 	const handleChange = (e) => {
-		setMember({
-            ...member
-            , [e.target.name]: e.target.value
-        });
+        const { name, value } = e.target;
+
+        if(name === 'email') {
+            setEmail(value);
+        }else if (name === 'password') {
+            setPassword(value);
+        }else if(name === 'passwordCheck') {
+            setPasswordCheck(value);
+        }
 	}
+
+    const validInput = () => {
+
+        if(!isValidEmail(email)) {
+            setError({
+                type: 'email'
+                , msg: '이메일 형식이 올바르지 않습니다.'
+            });
+            emailRef.current.focus();
+            return false;
+        }
+        
+        if(!isValidPassword(password)) {
+            setError({
+                type: 'password'
+                , msg: '비밀번호 형식이 올바르지 않습니다.\n4자리 이상 입력해 주세요.'
+            });
+            passwordRef.current.focus();
+            return false;
+        }
+
+        if(!isValidPassword(password, passwordCheck)) {
+            setError({
+                type: 'passwordCheck'
+                , msg: '비밀번호가 일치하지 않습니다.'
+            });
+            passwordCheckRef.current.focus();
+            return false;
+        }
+        
+        setError({
+            type: null
+            , msg: null
+        });
+
+        return true;
+    }
 
     const submitSignup = (e) => {
         e.preventDefault();
 
-        // TODO : add validation
+        if(!validInput()){
+            return;
+        }
 
-        const {email, password, passwordCheck} = member;
-
-        const data = {
-            body: JSON.stringify({
-                email
-                , password
-                , passwordCheck
-            })
-            , headers: {'Content-Type':'application/json'}
-            , method: 'POST'
-        };
-
-        console.log(data);
-
-        fetch('http://localhost:3000/api/auth/signup', data)
-                
-            .then(response => {
-                
-
-                console.log(response);
-                if(!response.ok) {
-
-                    console.log('1-1');
-                    return response.json();
-                }else {
-                    
-                    console.log('1-2');
-                    return response.json();
-                }
-            })
-            .then(json => {
-                console.log('2');
-                console.log(json);
-            })
-            .catch(error => {
-                console.log('33');
-                console.log(error);
-            });
+        commonFetch(
+            '/api/auth/signup'
+            , {
+                method: 'POST',
+                body: JSON.stringify({
+                    email
+                    , password
+                    , passwordCheck
+                })
+            }
+            , () => {
+                alert('회원가입이 완료되었습니다.');
+                navigate('/sginin');
+            }
+        );
     };
-
-    const successTemp = () => {
-        console.log('TODO : 성공 시 동작하는 임시 함수입니다.');
-    }
-
-    const failTemp = (text) => {
-        console.log('TODO : 실패 시 동작하는 임시 함수입니다.');
-        console.log(text)
-    }
 
     return (
         <form className="pg-wrap signup-wrap" onSubmit={submitSignup}>
@@ -77,20 +102,23 @@ const Signup = () => {
             <ul className="pg-contents pg-type-lists">
                 <li className="list">
                     <h4 className="ipt-title">email</h4>
-                    <div className="ipt-contents">{/* error class name : red */}
-                        <input type="text" name="email" placeholder="example@google.com" defaultValue={email} onChange={handleChange} />
+                    <div className={`ipt-contents ${error.type === 'email' ? 'red' : ''}`}>
+                        <input type="text" name="email" placeholder="example@google.com" defaultValue={email} onChange={handleChange} ref={emailRef} />
+                        <div className="err-msg">{error.type === 'email' && error.msg}</div>
                     </div>
                 </li>
                 <li className="list">
                     <h4 className="ipt-title">password</h4>
-                    <div className="ipt-contents">
-                        <input type="password" name="password" placeholder="TODO : password format" defaultValue={password} onChange={handleChange} />
+                    <div className={`ipt-contents ${error.type === 'password' ? 'red' : ''}`}>
+                        <input type="password" name="password" placeholder="4자 이상" defaultValue={password} onChange={handleChange} ref={passwordRef} />
+                        <div className="err-msg">{error.type === 'password' && error.msg}</div>
                     </div>
                 </li>
                 <li className="list">
                     <h4 className="ipt-title">password check</h4>
-                    <div className="ipt-contents">
-                        <input type="password" name="passwordCheck" placeholder="TODO : password format" defaultValue={passwordCheck} onChange={handleChange} />
+                    <div className={`ipt-contents ${error.type === 'passwordCheck' ? 'red' : ''}`}>
+                        <input type="password" name="passwordCheck" placeholder="비밀번호 확인" defaultValue={passwordCheck} onChange={handleChange} ref={passwordCheckRef} />
+                        <div className="err-msg">{error.type === 'passwordCheck' && error.msg}</div>
                     </div>
                 </li>
             </ul>
