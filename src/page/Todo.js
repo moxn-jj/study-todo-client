@@ -21,13 +21,14 @@ const Todo = () => {
     }, []);  // 의존성 배열이 빈 배열이므로 이 useEffect는 컴포넌트가 마운트될 때 딱 한 번만 실행됩니다.
     
 
+    // 공부를 위해 async로 만들었음
     async function getTodos() {
 
         // commonFetch에 await를 붙임으로써 commonFetch가 끝날 때까지 기다림
         await commonFetch(
-            '/api/todos', 
-            {method: 'GET'}, 
-            data => {
+            '/api/todo'
+            , {method: 'GET'}
+            , data => {
                 console.log('2. 실행돼?');
                 setTodos(data);
             }
@@ -41,148 +42,71 @@ const Todo = () => {
 
     // form 컴포넌트에 필요한 기능
     // 버튼이 클릭되면 새로운 todo 생성 후 todos 업데이트
-    function handleCreate(inputValue) {
-
-        // const {color, todos} = this.state;
+    function createTodo(inputValue) {
 
         if(inputValue === ''){
             alert('할 일을 입력해 주세요.');
             return;
         }
-        setTodos(todos.concat({ 
-                // id: this.id++
-                id: todos.length + 1
-                // , content: input
-                , content: inputValue
-                , isComplete: false
-                , color: color
-            })
+
+        commonFetch(
+            '/api/todo'
+            , {
+                method: 'POST'
+                , body: JSON.stringify({"content":inputValue,"color":color})
+            }
+            , data => {
+                setTodos(todos => [data, ...todos]);
+            }
         );
-
-        const data = {
-            body: JSON.stringify({"content":inputValue,"color":color})
-            , headers: {
-                    'Content-Type':'application/json'
-                    , authorization: getAuthorization()
-                }
-            , method: 'post'
-        };
-
-        console.log(data);
-
-        fetch("/api/todos", data)
-            .then(response => {
-                console.log(response);
-                if(!response.ok) {
-                    console.log('실패!');
-                    return response.json().then(err => {
-                        throw {code: err.code, message: err.message};
-                    });
-                }else {
-                    console.log('성공!');
-
-                    const newAccessToken = response.headers.get('Authorization');
-                    if(newAccessToken) {
-                        console.log('newAccessToken2');
-                        setAuthorization(newAccessToken);
-                    }
-                }
-            })
-            .catch(err => {
-                console.log('err');
-                console.log(err);
-                alert(`${err.message} (${err.code})`);
-            });
-
     }
 
-    // form 컴포넌트에 필요한 기능
-    // input에서 엔터 눌리면 버튼 클릭과 동일하게 실행되기
-    // handleKeyDown(event) {
-    //     if(event.key === 'Enter'){
-    //         this.handleCreate();
-    //     }
-    // }
-
-    function handleToggle(id) {
-        const {todos} = this.state;
+    function toggleTodo(id) {
 
         // 파라미터로 받은 id로 몇번째 아이템인지 찾기
         const index = todos.findIndex(todo => todo.id === id);
-        const selected = todos[index];
 
-        if(!window.confirm(selected.isComplete? '완료를 취소하시겠습니까?' : '완료 처리하시겠습니까?')){
+        if(!window.confirm(todos[index].isComplete? '완료를 취소하시겠습니까?' : '완료 처리하시겠습니까?')){
             return;
         }
 
-        // 배열 복사. 추후 최적화하기 위하여 배열을 직접 수정하지 않음
-        // 이 때 전개연산자(...)를 사용하였기 때문에 deep copy가 아닌 shallow copy가 발생함. 따라서 오버헤드가 발생하지 않음
-        const nextTodos = [...todos]; 
-        
-        // nextTodos 배열 중 선택한 요소를 재정의 함
-        // isComplete를 제외한 요소는 그대로 작성을 하고, isComplete만 값을 토글시켜줌
-        // 이 때 위에서 todos를 얕은 복사했기 때문에 바로 isComplete 값을 변경하는 것이 아니고 새로 정의함
-        nextTodos[index] = {
-            ...selected,
-            isComplete : !selected.isComplete
-        };
-
-        setTodos(nextTodos);
-
-        const data = {
-            header: {'Content-Type':'application/json'}
-            , method: 'put'
-        };
-
-        fetch('/api/todos/' + id, data)
-            .then(res => {
-                if(!res.ok) {
-                    throw new Error(res.status);
-                }else {
-                    return this.handleInitInfo();
-                }
-            })
-            .catch(err => console.log(err));
-
+        commonFetch(
+            `/api/todo/${id}`
+            , {
+                method: 'PUT'
+            }
+            , () => {
+                
+                setTodos(todos.filter(todo => {
+                    if(todo.id === id){
+                        todo.isComplete = !todo.isComplete;
+                    }
+                    return todos;
+                }));
+            }
+        );
     }
 
-    function handleRemove(id) {
-        const {todos} = this.state;
-
+    function removeTodo(id) {
         const removeContent = todos.find(todo => todo.id === id).content;
         if(!window.confirm(`'${removeContent}를 삭제하시겠습니까?`)){
             return;
         }
 
-        // 파라미터로 받은 id를 가지지 않은 배열을 새로 생성
-        setTodos(todos.filter(todo => todo.id !== id));
-
-        const data = {
-            header: {'Content-Type':'application/json'}
-            , method: 'delete'
-        }
-        fetch("/api/todos/" + id, data)
-            .then(res => {
-                if(!res.ok) {
-                    throw new Error(res.status);
-                }else {
-                    return this.handleInitInfo();
-                }
-            })
-            .catch(err => console.log(err));
+        commonFetch(
+            `/api/todo/${id}`
+            , {
+                method: 'DELETE'
+            }
+            , data => {
+                setTodos(todos.filter(todo => todo.id !== id));
+            }
+        );
     };
 
     function handleColor(color){
         setColor(color);
     }
-
-    // const {input, todos, color} = this.state;
-    // const {handleChange
-    //     , handleCreate
-    //     , handleKeyDown
-    //     , handleToggle
-    //     , handleRemove
-    //     , handleColor} = this;
 
     return (
         <TodoListTemplate 
@@ -201,18 +125,15 @@ const Todo = () => {
 
             // TodoListTemplate의 form
             form={<Form 
-                    // value={input} 
                     color={color}
-                    // onChange={handleChange} 
-                    onCreate={getTodos} 
-                    // onKeyDown={handleKeyDown} 
+                    onCreate={createTodo} 
                     />}>
 
             {/* TodoListTemplate의 children */}
             <TodoItemList 
                 todos={todos}
-                onToggle={handleToggle}
-                onRemove={handleRemove} />
+                onToggle={toggleTodo}
+                onRemove={removeTodo} />
         </TodoListTemplate>
     );
 }

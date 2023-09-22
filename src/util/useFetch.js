@@ -28,7 +28,14 @@ export const useFetch = () => {
                         saveToken(newAccessToken);
                     }
 
-                    return response.json();
+                    return response.json().then(data => {
+                        return data;
+                    }).catch(() => {
+                        return {
+                            status:response.status
+                        }
+                    });
+
                 }else {
 
                     try{
@@ -50,8 +57,10 @@ export const useFetch = () => {
                     }catch(error){
                         console.log('리턴된 에러 포맷이 json 타입이 아닐 때');
                         console.log(error);
-
-                        throw response.status;
+                        // TODO : 여기 확인 필요
+                        throw {
+                            status:response.status
+                        };
                     }
                 }
             })
