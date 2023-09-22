@@ -12,7 +12,7 @@ export const useFetch = () => {
         options.headers = {
             ...(options.headers ?? {}),
             'Content-Type':'application/json',
-            authorization: getToken()
+            'Authorization': getToken()
         };
         console.log(options);
 
